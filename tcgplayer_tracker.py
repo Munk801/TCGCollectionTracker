@@ -344,6 +344,9 @@ class TCGPlayerSheetManager(BaseSheetDependencyInjectionManager):
                 print("Recreating web driver")
                 driver = create_web_driver()
 
+        # Quit the driver after all records are processed
+        driver.quit()
+
 def create_web_driver():
     """Creates the web driver to run the script for searching the site."""
     driver = webdriver.Firefox()
