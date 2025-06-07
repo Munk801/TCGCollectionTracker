@@ -1,4 +1,10 @@
 
+## What is it?
+
+This script is a personal script made to simplify the lives of my spouse and myself when selling
+TCG cards via TCGPlayer.  It simply updates various information on a google sheet to manage our 
+inventory better and understand current market value.
+
 ## Getting Started
 ### Setting up Google Drive API Access
 
