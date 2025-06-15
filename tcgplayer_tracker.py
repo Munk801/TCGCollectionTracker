@@ -1,4 +1,5 @@
 
+import argparse
 import os
 import re
 import sys
@@ -265,7 +266,7 @@ class TCGPlayerSheetManager(BaseSheetDependencyInjectionManager):
             print("Batch Updating with requests: {}".format(requests))
             self.sheet.batch_update(requests, value_input_option='USER_ENTERED')
 
-    def updatePricing(self, driver):
+    def updatePricing(self, driver, start_row=None):
         print("Getting all records")
         records = self.sheet.get_all_records()
         # print("Records: {}".format(records))
@@ -273,6 +274,9 @@ class TCGPlayerSheetManager(BaseSheetDependencyInjectionManager):
             # Skip the first record
             # Row starts at 2
             row = i + 2
+            if start_row and row < start_row:
+                print("Skipping row {} as it is before the start row {}".format(row, start_row))
+                continue
             # If the link doesn't exist, check if it exists in another column
             product_id = self.getProductIDFromLink(record)
             if not record['TCG Product ID']:
@@ -355,26 +359,34 @@ def create_web_driver():
 def update_sheet(sheet, row, col, val):
     sheet.update_cell(row, col, val)
 
-def update_sheet_records(rows=None):
+def update_sheet_records(start_row=None):
     """Iterates through the records finding any shoes we have and will retrieve
     the pricing from stock X to update.
 
     Args:
         rows(list<int>): List of rows to specifically check
     """
-    if rows is None:
-        rows = []
-
     print("Loading web driver")
     driver = create_web_driver()
     print("Getting data from google sheet")
     manager = TCGPlayerSheetManager.shared_instance()
     manager.load()
     # sheet = manager.sheet
-    manager.updatePricing(driver)
+    manager.updatePricing(driver, start_row=start_row)
 
 def main():
-    update_sheet_records()
+    parser = argparse.ArgumentParser(description='Process spreadsheet data')
+    
+    # Optional argument with default value
+    parser.add_argument(
+        '--start-row', 
+        type=int, 
+        default=1, 
+        help='Row number to start processing from (default: 1)'
+    )
+    
+    args = parser.parse_args()
+    update_sheet_records(start_row=args.start_row)
 
 if __name__ == "__main__":
     main()
