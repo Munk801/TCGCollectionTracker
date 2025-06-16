@@ -35,6 +35,13 @@ pip install -r requirements.txt
 
 ```
 
+### Updating the requirements.txt
+If you install new python modules, you will need to re-freeze and store in the requirements.txt
+
+```bash
+pip freeze > requirements.txt
+```
+
 To run the actual script
 ```
 python tcgplayer_tracker.py

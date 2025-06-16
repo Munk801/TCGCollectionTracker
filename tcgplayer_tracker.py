@@ -9,11 +9,14 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementNotInteractableException
 
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
+from PySide6 import QtWidgets, QtCore, QtGui
 
 
 # GLOBALS
@@ -353,7 +356,15 @@ class TCGPlayerSheetManager(BaseSheetDependencyInjectionManager):
 
 def create_web_driver():
     """Creates the web driver to run the script for searching the site."""
-    driver = webdriver.Firefox()
+    # Setup Firefox options
+    firefox_options = Options()
+    firefox_options.add_argument("--headless")  # Run in background
+    firefox_options.add_argument("--no-sandbox")
+    firefox_options.add_argument("--disable-dev-shm-usage")
+    firefox_options.add_argument("--width=1920")
+    firefox_options.add_argument("--height=1080")
+ 
+    driver = webdriver.Firefox(options=firefox_options)
     return driver
 
 def update_sheet(sheet, row, col, val):
@@ -374,6 +385,20 @@ def update_sheet_records(start_row=None):
     # sheet = manager.sheet
     manager.updatePricing(driver, start_row=start_row)
 
+def launch_ui():
+    """Launches the UI for the script."""
+    application = QtWidgets.QApplication()
+    window = QtWidgets.QMainWindow()
+    window.setWindowTitle("TCGPlayer Tracker")
+    window.setGeometry(100, 100, 800, 600)
+    label = QtWidgets.QLabel("TCGPlayer Tracker is running...", window)
+    label.setAlignment(QtCore.Qt.AlignCenter)
+    window.setCentralWidget(label)
+    window.show()
+    application.exec()
+    # For now, we will just print that the UI is not implemented    
+    print("Launching UI is not implemented yet.")
+
 def main():
     parser = argparse.ArgumentParser(description='Process spreadsheet data')
     
@@ -384,8 +409,19 @@ def main():
         default=1, 
         help='Row number to start processing from (default: 1)'
     )
-    
+
+    parser.add_argument(
+        '--launch-ui',
+        action='store_true',
+        help='Launch the UI for the script (default: False)',
+    )
+
     args = parser.parse_args()
+
+    if args.launch_ui:
+        launch_ui()
+        return
+
     update_sheet_records(start_row=args.start_row)
 
 if __name__ == "__main__":
